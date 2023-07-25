@@ -45,7 +45,9 @@ class CustomerHttpController{
 
 	@GetMapping("/customers")
 	Iterable<Customer> all(){
-	return this.repository.findAll();
+		return Observation.createNotStarted("all", this.registry).observe(
+				() -> repository.findAll()
+		);
 }
 
 @GetMapping("/customers/{name}")
