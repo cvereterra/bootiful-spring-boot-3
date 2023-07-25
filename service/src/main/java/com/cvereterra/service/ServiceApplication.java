@@ -1,7 +1,8 @@
 package com.cvereterra.service;
 
+import io.micrometer.observation.Observation;
+import io.micrometer.observation.ObservationRegistry;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.beans.factory.parsing.Problem;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -11,10 +12,11 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.function.Supplier;
 
 @SpringBootApplication
 public class ServiceApplication {
@@ -34,9 +36,11 @@ public class ServiceApplication {
 @ResponseBody
 class CustomerHttpController{
 	private final CustomerRepository repository;
+	private final ObservationRegistry registry;
 
-	CustomerHttpController(CustomerRepository repository) {
+	CustomerHttpController(CustomerRepository repository, ObservationRegistry registry) {
 		this.repository = repository;
+		this.registry = registry;
 	}
 
 	@GetMapping("/customers")
@@ -47,7 +51,9 @@ class CustomerHttpController{
 @GetMapping("/customers/{name}")
 	Iterable<Customer> byName(@PathVariable String name){
 		Assert.state(Character.isUpperCase(name.charAt(0)), "the name must be uppercase");
-		return this.repository.findByName(name);
+		return Observation.createNotStarted("by-name", this.registry).observe(
+				() -> repository.findByName(name)
+		);
 }
 }
 
