@@ -1,5 +1,6 @@
 package com.cvereterra.service;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.parsing.Problem;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -63,7 +64,8 @@ record Customer(@Id Integer id, String name){
 class ErrorHandlingControllerAdvice {
 
 	@ExceptionHandler
-	public ProblemDetail handle(IllegalStateException isa){
+	public ProblemDetail handle(IllegalStateException isa, HttpServletRequest request){
+		request.getHeaderNames().asIterator().forEachRemaining(h -> System.out.println(h + " : " + request.getHeader(h)));
 		var problemDetail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST.value());
 		problemDetail.setDetail(isa.getMessage());
 		return problemDetail;
