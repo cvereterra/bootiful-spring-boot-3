@@ -72,7 +72,8 @@ class GraphqlController {
 
 //	@SchemaMapping(typeName = "Customer")
 //	Profile profile (Customer c ){
-//		// This will be called for each customer, very inneficent
+//		// If we add an API call here, it will be called once for each customer	
+// 		// This is very inneficent, we will solve this issue with @BatchMapping
 //		return new Profile(c.id());
 //	}
 }
